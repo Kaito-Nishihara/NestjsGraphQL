@@ -4,14 +4,18 @@ import { Task as TaskModel } from './modules/task.model';
 import { CreateTaskInput } from './dto/createTask.input';
 import { Task } from '@prisma/client';
 import { UpdateTaskInput } from './dto/updateTask.input';
+import { UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from 'src/auth/guards/jwt.auth.guard';
 
 @Resolver()
 export class TaskResolver {
   constructor(private readonly taskService: TaskService) {}
 
   @Query(() => [TaskModel], { nullable: 'items' })
-  async getTasks(): Promise<Task[]> {
-    return await this.taskService.getTasks();
+  async getTasks(
+    @Args('userId', { type: () => Int }) uesrId: number,
+  ): Promise<Task[]> {
+    return await this.taskService.getTasks(uesrId);
   }
 
   @Mutation(() => TaskModel)
@@ -29,6 +33,7 @@ export class TaskResolver {
   }
 
   @Mutation(() => TaskModel)
+  @UseGuards(JwtAuthGuard)
   async deleteTask(@Args('id', { type: () => Int }) id: number): Promise<Task> {
     return await this.taskService.deleteTask(id);
   }
